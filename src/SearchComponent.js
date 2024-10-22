@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function SearchComponent({ model }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
+  const [embeddings, setEmbeddings] = useState(null);
 
   const targets = [
-    "dream", "nightmare", "sleep", "awake", "lucid", "subconscious",
-    "REM", "interpretation", "symbolism", "recurring", "vivid",
-    "daydream", "premonition", "surreal", "analysis", "memory"
+    "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
+    "Sleep patterns and dreams", "Symbolism in dreams", "Recurring dream meanings",
+    "Dream journaling methods", "Psychological aspects of dreaming",
+    "Cultural perspectives on dreams", "Dreams and memory consolidation",
+    "Prophetic dreams", "Daydreaming and creativity", "Dream-inspired art",
+    "Sleep disorders and dreaming", "Meditation and dream quality"
   ];
 
-  async function calculateSemanticSimilarity(input, targets) {
+  useEffect(() => {
+    async function embedTargets() {
+      if (model) {
+        const targetEmbeddings = await model.embed(targets);
+        setEmbeddings(targetEmbeddings);
+      }
+    }
+    embedTargets();
+  }, [model]);
+
+  async function calculateSemanticSimilarity(input) {
     const inputEmbedding = await model.embed([input]);
-    const targetEmbeddings = await model.embed(targets);
     
-    const similarities = targetEmbeddings.map(targetEmb => 
+    const similarities = embeddings.map(targetEmb => 
       cosineSimilarity(inputEmbedding[0], targetEmb)
     );
     
@@ -29,7 +42,11 @@ function SearchComponent({ model }) {
   }
 
   async function handleSearch() {
-    const similarities = await calculateSemanticSimilarity(input, targets);
+    if (!embeddings) {
+      alert("Embeddings are not ready yet. Please wait a moment and try again.");
+      return;
+    }
+    const similarities = await calculateSemanticSimilarity(input);
     const searchResults = targets.map((target, index) => ({
       name: target,
       similarity: similarities[index]
@@ -45,7 +62,7 @@ function SearchComponent({ model }) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter search term"
       />
-      <button onClick={handleSearch}>Search</button>
+      <button onClick={handleSearch} disabled={!embeddings}>Search</button>
       <ul>
         {results.map((result, index) => (
           <li key={index}>

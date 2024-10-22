@@ -10,19 +10,27 @@ function App() {
   useEffect(() => {
     async function loadModel() {
       try {
+        setLoadingStatus({ isLoading: true, progress: 5, message: 'Preparing to load model...' });
+        
+        // Simulate initial loading steps
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setLoadingStatus({ isLoading: true, progress: 10, message: 'Starting model download...' });
         
         const loadedModel = await use.load((progress) => {
+          const adjustedProgress = Math.round(progress * 80) + 10;
           setLoadingStatus({ 
             isLoading: true, 
-            progress: Math.round(progress * 90) + 10, 
-            message: `Downloading model: ${Math.round(progress * 100)}%`
+            progress: adjustedProgress, 
+            message: `Downloading model: ${adjustedProgress}%`
           });
         });
 
-        setLoadingStatus({ isLoading: true, progress: 100, message: 'Finalizing...' });
+        setLoadingStatus({ isLoading: true, progress: 95, message: 'Finalizing...' });
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate finalization
         setModel(loadedModel);
-        setLoadingStatus({ isLoading: false, progress: 100, message: 'Model loaded successfully!' });
+        setLoadingStatus({ isLoading: true, progress: 100, message: 'Model loaded successfully!' });
+        await new Promise(resolve => setTimeout(resolve, 500)); // Show 100% briefly
+        setLoadingStatus({ isLoading: false, progress: 100, message: 'Ready!' });
       } catch (error) {
         setLoadingStatus({ isLoading: false, progress: 0, message: `Error loading model: ${error.message}` });
       }
