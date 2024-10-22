@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 function SearchComponent({ model }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
-  const [embeddings, setEmbeddings] = useState(null);
   const [customNames, setCustomNames] = useState('');
 
   const targets = [
@@ -18,12 +17,11 @@ function SearchComponent({ model }) {
   useEffect(() => {
     async function embedTargets() {
       if (model) {
-        const targetEmbeddings = await model.embed(targets);
-        setEmbeddings(targetEmbeddings);
+        await model.embed(targets);
       }
     }
     embedTargets();
-  }, [model]);
+  }, [model, targets]);
 
   async function calculateSemanticSimilarity(input, targetList) {
     const inputEmbedding = await model.embed([input]);
