@@ -1,9 +1,16 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
+import time
+
+print("Downloading and loading the Universal Sentence Encoder model...")
+start_time = time.time()
 
 # Load the Universal Sentence Encoder model
 model = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
+
+end_time = time.time()
+print(f"Model loaded successfully in {end_time - start_time:.2f} seconds.")
 
 def encode(texts):
     return model(texts)
