@@ -1,37 +1,44 @@
-# Semantic Search App
+# Semantic Search Script
 
-This is a React-based web application that performs semantic search using TensorFlow.js and the Universal Sentence Encoder model.
+This is a Python script that performs semantic search using TensorFlow Hub and the Universal Sentence Encoder model.
 
 ## Features
 
 - Semantic search functionality
-- Real-time similarity calculation
-- User-friendly interface
+- Cosine similarity calculation
+- Command-line interface
 
 ## Prerequisites
 
-- Node.js 16.x
+- Python 3.7+
+- TensorFlow 2.x
+- TensorFlow Hub
 
 ## Installation
 
 1. Clone the repository
 2. Navigate to the project directory
-3. Run `npm install` to install dependencies
+3. Install the required packages:
+
+```
+pip install tensorflow tensorflow_hub numpy
+```
 
 ## Usage
 
-To start the development server, run:
+To run the script, use:
 
 ```
-npm start
+python semantic_search.py
 ```
 
-The application will be available at `http://localhost:3000`.
+Follow the prompts to enter search queries. Type 'quit' to exit the program.
 
 ## Technologies Used
 
-- React
-- TensorFlow.js
+- Python
+- TensorFlow
+- TensorFlow Hub
 - Universal Sentence Encoder
 
 ## License
