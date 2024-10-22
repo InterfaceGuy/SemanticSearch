@@ -2,30 +2,30 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import time
-import sys
-
-def progress_bar(current, total, width=50):
-    percent = float(current) / total
-    arrow = '-' * int(percent * width)
-    spaces = ' ' * (width - len(arrow))
-    sys.stdout.write(f"\rProgress: [{arrow + spaces}] {int(percent * 100)}%")
-    sys.stdout.flush()
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
 
-# Custom progress function
-def progress(value):
-    if value.numpy() == 1.0:
-        print("\nModel download complete. Loading model...")
-    else:
-        progress_bar(value.numpy(), 1.0)
+# Custom progress callback
+class ProgressBar:
+    def __init__(self, total_size):
+        self.progbar = tf.keras.utils.Progbar(total_size)
+        self.last_value = 0
+
+    def __call__(self, value):
+        delta = value - self.last_value
+        self.progbar.add(delta)
+        self.last_value = value
 
 # Load the Universal Sentence Encoder model with progress tracking
-model = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4", progress=progress)
+model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+model_size = 988649472  # Approximate size in bytes
+progress_bar = ProgressBar(model_size)
+
+model = hub.load(model_url, callbacks=[progress_bar])
 
 end_time = time.time()
-print(f"Model loaded successfully in {end_time - start_time:.2f} seconds.")
+print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
 
 def encode(texts):
     return model(texts)
