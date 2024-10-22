@@ -40,14 +40,8 @@ function App() {
 
   return (
     <div className="App">
-      {loadingStatus.isLoading ? (
-        <LoadingScreen status={loadingStatus} />
-      ) : (
-        <>
-          <h1>Semantic Search</h1>
-          <SearchComponent model={model} />
-        </>
-      )}
+      <h1>Semantic Search</h1>
+      <SearchComponent model={model} loadingStatus={loadingStatus} />
     </div>
   );
 }

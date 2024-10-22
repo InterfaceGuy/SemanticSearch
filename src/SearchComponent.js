@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import './SearchComponent.css';
 
-function SearchComponent({ model }) {
+function SearchComponent({ model, loadingStatus }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
   const [customNames, setCustomNames] = useState('');
@@ -78,33 +79,46 @@ function SearchComponent({ model }) {
   }
 
   return (
-    <div>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter search term"
-      />
-      <button onClick={handleSearch} disabled={isSearching || !isModelReady}>
-        {isSearching ? 'Searching...' : (isModelReady ? 'Search' : 'Model Loading...')}
-      </button>
-      <div>
-        <h3>Custom Names (one per line):</h3>
-        <textarea
-          value={customNames}
-          onChange={(e) => setCustomNames(e.target.value)}
-          placeholder="Enter custom names, one per line"
-          rows={5}
-          cols={30}
-        />
-      </div>
-      <ul>
-        {results.map((result, index) => (
-          <li key={index}>
-            {result.name} - Similarity: {result.similarity.toFixed(4)}
-          </li>
-        ))}
-      </ul>
+    <div className="search-component">
+      {loadingStatus.isLoading ? (
+        <div className="loading-container">
+          <h2>Loading Semantic Search Model</h2>
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${loadingStatus.progress}%` }}></div>
+          </div>
+          <p>{loadingStatus.progress}% Complete</p>
+          <p>{loadingStatus.message}</p>
+        </div>
+      ) : (
+        <>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Enter search term"
+          />
+          <button onClick={handleSearch} disabled={isSearching || !isModelReady}>
+            {isSearching ? 'Searching...' : (isModelReady ? 'Search' : 'Model Loading...')}
+          </button>
+          <div>
+            <h3>Custom Names (one per line):</h3>
+            <textarea
+              value={customNames}
+              onChange={(e) => setCustomNames(e.target.value)}
+              placeholder="Enter custom names, one per line"
+              rows={5}
+              cols={30}
+            />
+          </div>
+          <ul>
+            {results.map((result, index) => (
+              <li key={index}>
+                {result.name} - Similarity: {result.similarity.toFixed(4)}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
