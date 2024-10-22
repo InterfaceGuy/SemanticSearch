@@ -2,6 +2,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import time
+import json
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
@@ -33,16 +34,14 @@ def semantic_search(query, targets):
     
     return results
 
+# Load targets from JSON file
+def load_targets():
+    with open('names.json', 'r') as f:
+        return json.load(f)
+
 # Example usage
 if __name__ == "__main__":
-    targets = [
-        "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
-        "Sleep patterns and dreams", "Symbolism in dreams", "Recurring dream meanings",
-        "Dream journaling methods", "Psychological aspects of dreaming",
-        "Cultural perspectives on dreams", "Dreams and memory consolidation",
-        "Prophetic dreams", "Daydreaming and creativity", "Dream-inspired art",
-        "Sleep disorders and dreaming", "Meditation and dream quality"
-    ]
+    targets = load_targets()
     
     while True:
         query = input("Enter your search query (or 'quit' to exit): ")
