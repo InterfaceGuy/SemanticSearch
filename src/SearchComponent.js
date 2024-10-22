@@ -4,6 +4,7 @@ function SearchComponent({ model }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
   const [embeddings, setEmbeddings] = useState(null);
+  const [customNames, setCustomNames] = useState('');
 
   const targets = [
     "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
@@ -24,10 +25,11 @@ function SearchComponent({ model }) {
     embedTargets();
   }, [model]);
 
-  async function calculateSemanticSimilarity(input) {
+  async function calculateSemanticSimilarity(input, targetList) {
     const inputEmbedding = await model.embed([input]);
+    const targetEmbeddings = await model.embed(targetList);
     
-    const similarities = embeddings.map(targetEmb => 
+    const similarities = targetEmbeddings.map(targetEmb => 
       cosineSimilarity(inputEmbedding[0], targetEmb)
     );
     
@@ -42,12 +44,16 @@ function SearchComponent({ model }) {
   }
 
   async function handleSearch() {
-    if (!embeddings) {
-      alert("Embeddings are not ready yet. Please wait a moment and try again.");
+    if (!model) {
+      alert("Model is not ready yet. Please wait a moment and try again.");
       return;
     }
-    const similarities = await calculateSemanticSimilarity(input);
-    const searchResults = targets.map((target, index) => ({
+
+    const customNameList = customNames.split('\n').filter(name => name.trim() !== '');
+    const allTargets = [...targets, ...customNameList];
+
+    const similarities = await calculateSemanticSimilarity(input, allTargets);
+    const searchResults = allTargets.map((target, index) => ({
       name: target,
       similarity: similarities[index]
     }));
@@ -62,7 +68,17 @@ function SearchComponent({ model }) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter search term"
       />
-      <button onClick={handleSearch} disabled={!embeddings}>Search</button>
+      <button onClick={handleSearch} disabled={!model}>Search</button>
+      <div>
+        <h3>Custom Names (one per line):</h3>
+        <textarea
+          value={customNames}
+          onChange={(e) => setCustomNames(e.target.value)}
+          placeholder="Enter custom names, one per line"
+          rows={5}
+          cols={30}
+        />
+      </div>
       <ul>
         {results.map((result, index) => (
           <li key={index}>
