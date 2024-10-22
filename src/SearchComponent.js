@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 function SearchComponent({ model }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
   const [customNames, setCustomNames] = useState('');
 
-  const targets = [
+  const targets = useMemo(() => [
     "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
     "Sleep patterns and dreams", "Symbolism in dreams", "Recurring dream meanings",
     "Dream journaling methods", "Psychological aspects of dreaming",
     "Cultural perspectives on dreams", "Dreams and memory consolidation",
     "Prophetic dreams", "Daydreaming and creativity", "Dream-inspired art",
     "Sleep disorders and dreaming", "Meditation and dream quality"
-  ];
+  ], []);
 
   useEffect(() => {
     async function embedTargets() {
