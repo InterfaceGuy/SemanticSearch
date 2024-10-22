@@ -2,27 +2,19 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import time
+import sys
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
 
-# Custom progress callback
-class ProgressBar:
-    def __init__(self, total_size):
-        self.progbar = tf.keras.utils.Progbar(total_size)
-        self.last_value = 0
+# Custom progress function
+def print_progress(value):
+    sys.stdout.write(f"\rProgress: {value*100:.1f}%")
+    sys.stdout.flush()
 
-    def __call__(self, value):
-        delta = value - self.last_value
-        self.progbar.add(delta)
-        self.last_value = value
-
-# Load the Universal Sentence Encoder model with progress tracking
+# Load the Universal Sentence Encoder model
 model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
-model_size = 988649472  # Approximate size in bytes
-progress_bar = ProgressBar(model_size)
-
-model = hub.load(model_url, callbacks=[progress_bar])
+model = hub.load(model_url)
 
 end_time = time.time()
 print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
