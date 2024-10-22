@@ -32,16 +32,6 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow();
 });
 
-ipcMain.handle('save-names', async (event, names) => {
-  try {
-    await fs.promises.writeFile(path.join(__dirname, 'python', 'names.json'), JSON.stringify(names, null, 2));
-    return { success: true };
-  } catch (error) {
-    console.error('Error saving names:', error);
-    return { success: false, error: error.message };
-  }
-});
-
 ipcMain.handle('run-search', async (event, query) => {
   return new Promise((resolve, reject) => {
     PythonShell.run(

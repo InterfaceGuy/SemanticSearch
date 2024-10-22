@@ -4,7 +4,6 @@ const { ipcRenderer } = window.require('electron');
 function SearchComponent() {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
-  const [customNames, setCustomNames] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = async () => {
@@ -19,17 +18,6 @@ function SearchComponent() {
     setIsSearching(false);
   };
 
-  const handleSaveNames = async () => {
-    const names = customNames.split(',').map(name => name.trim());
-    try {
-      await ipcRenderer.invoke('save-names', names);
-      alert('Names saved successfully!');
-    } catch (error) {
-      console.error('Error saving names:', error);
-      alert('Error saving names. Please try again.');
-    }
-  };
-
   return (
     <div>
       <div>
@@ -42,14 +30,6 @@ function SearchComponent() {
         <button onClick={handleSearch} disabled={isSearching}>
           {isSearching ? 'Searching...' : 'Search'}
         </button>
-      </div>
-      <div>
-        <textarea
-          value={customNames}
-          onChange={(e) => setCustomNames(e.target.value)}
-          placeholder="Enter custom names, separated by commas"
-        />
-        <button onClick={handleSaveNames}>Save Names</button>
       </div>
       <div>
         <h2>Results:</h2>
