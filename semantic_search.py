@@ -12,15 +12,27 @@ def print_progress(value):
     sys.stdout.write(f"\rProgress: {value*100:.1f}%")
     sys.stdout.flush()
 
-# Load the Universal Sentence Encoder model
-model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+# Load the Universal Sentence Encoder Lite model
+model_url = "https://tfhub.dev/google/universal-sentence-encoder-lite/2"
 model = hub.load(model_url)
+
+# Create a TensorFlow session
+session = tf.compat.v1.Session()
+
+# Initialize the model
+session.run(tf.compat.v1.global_variables_initializer())
+session.run(tf.compat.v1.tables_initializer())
+
+# Define the encoding function
+def encode(texts):
+    input_placeholder = tf.compat.v1.placeholder(tf.string, shape=[None])
+    encodings = model(input_placeholder)
+    return session.run(encodings, feed_dict={input_placeholder: texts})
 
 end_time = time.time()
 print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
 
-def encode(texts):
-    return model(texts)
+# The encode function is now defined above, near the model initialization
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
