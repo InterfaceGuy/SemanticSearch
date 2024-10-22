@@ -73,8 +73,10 @@ export default SearchComponent;
     "Sleep disorders and dreaming", "Meditation and dream quality"
   ]);
 
+  const [isModelReady, setIsModelReady] = useState(false);
+
   useEffect(() => {
-    async function embedTargets() {
+    async function initializeModel() {
       if (model) {
         try {
           await model.embed(targets);

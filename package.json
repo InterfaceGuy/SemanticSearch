@@ -39,11 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-{
-  "name": "semantic-search-electron",
-  "version": "1.0.0",
-  "private": true,
+  }
+}
   "main": "main.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
