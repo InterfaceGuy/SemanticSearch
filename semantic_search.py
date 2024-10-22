@@ -3,6 +3,7 @@ import tensorflow_hub as hub
 import numpy as np
 import time
 import json
+import re
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
@@ -21,6 +22,9 @@ print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
+def camel_case_to_sentence(text):
+    return re.sub(r'(?<!^)(?=[A-Z])', ' ', text).strip()
+
 def semantic_search(query, targets, name_mapping):
     # Encode the query and targets
     query_embedding = encode([query])
@@ -38,7 +42,7 @@ def semantic_search(query, targets, name_mapping):
 def load_targets():
     with open('names.json', 'r') as f:
         names = json.load(f)
-        return {name.lower(): name for name in names}
+        return {camel_case_to_sentence(name).lower(): name for name in names}
 
 # Example usage
 if __name__ == "__main__":
