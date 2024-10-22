@@ -49,10 +49,14 @@ ipcMain.handle('run-search', async (event, query) => {
   });
 });
 
-ipcMain.handle('get-results', async () => {
+ipcMain.handle('get-results', async (event, maxResults) => {
   try {
     const data = await fs.promises.readFile(path.join(__dirname, 'semantic_distances.json'), 'utf8');
-    return JSON.parse(data);
+    const results = JSON.parse(data);
+    const sortedResults = Object.entries(results)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, maxResults);
+    return Object.fromEntries(sortedResults);
   } catch (error) {
     console.error('Error reading results:', error);
     return { error: error.message };

@@ -3,6 +3,7 @@ const { ipcRenderer } = window.require('electron');
 
 function SearchComponent() {
   const [input, setInput] = useState('');
+  const [maxResults, setMaxResults] = useState(5);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -10,8 +11,8 @@ function SearchComponent() {
     setIsSearching(true);
     try {
       await ipcRenderer.invoke('run-search', input);
-      const searchResults = await ipcRenderer.invoke('get-results');
-      setResults(Object.entries(searchResults).sort((a, b) => b[1] - a[1]));
+      const searchResults = await ipcRenderer.invoke('get-results', maxResults);
+      setResults(Object.entries(searchResults).sort((a, b) => b[1] - a[1]).slice(0, maxResults));
     } catch (error) {
       console.error('Error during search:', error);
     }
@@ -26,6 +27,13 @@ function SearchComponent() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter search query"
+        />
+        <input
+          type="number"
+          value={maxResults}
+          onChange={(e) => setMaxResults(Math.max(1, parseInt(e.target.value) || 1))}
+          min="1"
+          placeholder="Max results"
         />
         <button onClick={handleSearch} disabled={isSearching}>
           {isSearching ? 'Searching...' : 'Search'}
