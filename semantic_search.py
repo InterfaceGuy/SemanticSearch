@@ -1,49 +1,34 @@
 import tensorflow as tf
 import tensorflow_hub as hub
+import tensorflow_text
 import numpy as np
 import time
-import sys
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
 
-# Custom progress function
-def print_progress(value):
-    sys.stdout.write(f"\rProgress: {value*100:.1f}%")
-    sys.stdout.flush()
-
 # Load the Universal Sentence Encoder Lite model
-model_url = "https://tfhub.dev/google/universal-sentence-encoder-lite/2"
+model_url = "https://tfhub.dev/google/universal-sentence-encoder-multilingual/3"
 model = hub.load(model_url)
 
-# Create a TensorFlow session
-session = tf.compat.v1.Session()
-
-# Initialize the model
-session.run(tf.compat.v1.global_variables_initializer())
-session.run(tf.compat.v1.tables_initializer())
-
 # Define the encoding function
+@tf.function
 def encode(texts):
-    input_placeholder = tf.compat.v1.placeholder(tf.string, shape=[None])
-    encodings = model(input_placeholder)
-    return session.run(encodings, feed_dict={input_placeholder: texts})
+    return model(texts)
 
 end_time = time.time()
 print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
-
-# The encode function is now defined above, near the model initialization
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def semantic_search(query, targets):
     # Encode the query and targets
-    query_embedding = encode([query])[0]
+    query_embedding = encode([query])
     target_embeddings = encode(targets)
     
     # Calculate similarities
-    similarities = [cosine_similarity(query_embedding, target_embedding) for target_embedding in target_embeddings]
+    similarities = np.inner(query_embedding, target_embeddings)[0]
     
     # Sort results
     results = sorted(zip(targets, similarities), key=lambda x: x[1], reverse=True)
