@@ -37,7 +37,8 @@ def semantic_search(query, targets):
 # Load targets from JSON file
 def load_targets():
     with open('names.json', 'r') as f:
-        return json.load(f)
+        names = json.load(f)
+        return {name: name.lower() for name in names}
 
 # Example usage
 if __name__ == "__main__":
@@ -48,9 +49,10 @@ if __name__ == "__main__":
         if query.lower() == 'quit':
             break
         
-        results = semantic_search(query, targets)
+        results = semantic_search(query, list(targets.values()))
         
         print("\nSearch results:")
         for target, similarity in results:
-            print(f"{target}: {similarity:.4f}")
+            original_name = next(key for key, value in targets.items() if value == target)
+            print(f"{original_name}: {similarity:.4f}")
         print()
