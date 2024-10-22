@@ -5,6 +5,7 @@ function SearchComponent({ model }) {
   const [results, setResults] = useState([]);
   const [customNames, setCustomNames] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isModelReady, setIsModelReady] = useState(false);
 
   const targets = useMemo(() => [
     "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
@@ -18,13 +19,22 @@ function SearchComponent({ model }) {
   useEffect(() => {
     async function embedTargets() {
       if (model) {
-        await model.embed(targets);
+        try {
+          await model.embed(targets);
+          setIsModelReady(true);
+        } catch (error) {
+          console.error("Error embedding targets:", error);
+          setIsModelReady(false);
+        }
       }
     }
     embedTargets();
   }, [model, targets]);
 
   async function calculateSemanticSimilarity(input, targetList) {
+    if (!model) {
+      throw new Error("Model is not initialized");
+    }
     const inputEmbedding = await model.embed([input]);
     const targetEmbeddings = await model.embed(targetList);
     
@@ -43,6 +53,11 @@ function SearchComponent({ model }) {
   }
 
   async function handleSearch() {
+    if (!isModelReady) {
+      alert("The model is not ready yet. Please wait and try again.");
+      return;
+    }
+
     setIsSearching(true);
     try {
       const customNameList = customNames.split('\n').filter(name => name.trim() !== '');
@@ -70,8 +85,8 @@ function SearchComponent({ model }) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter search term"
       />
-      <button onClick={handleSearch} disabled={isSearching}>
-        {isSearching ? 'Searching...' : 'Search'}
+      <button onClick={handleSearch} disabled={isSearching || !isModelReady}>
+        {isSearching ? 'Searching...' : (isModelReady ? 'Search' : 'Model Loading...')}
       </button>
       <div>
         <h3>Custom Names (one per line):</h3>
