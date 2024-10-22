@@ -4,6 +4,7 @@ function SearchComponent({ model }) {
   const [input, setInput] = useState('');
   const [results, setResults] = useState([]);
   const [customNames, setCustomNames] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   const targets = useMemo(() => [
     "Dream interpretation", "Lucid dreaming techniques", "Nightmare analysis",
@@ -47,15 +48,23 @@ function SearchComponent({ model }) {
       return;
     }
 
-    const customNameList = customNames.split('\n').filter(name => name.trim() !== '');
-    const allTargets = [...targets, ...customNameList];
+    setIsSearching(true);
+    try {
+      const customNameList = customNames.split('\n').filter(name => name.trim() !== '');
+      const allTargets = [...targets, ...customNameList];
 
-    const similarities = await calculateSemanticSimilarity(input, allTargets);
-    const searchResults = allTargets.map((target, index) => ({
-      name: target,
-      similarity: similarities[index]
-    }));
-    setResults(searchResults.sort((a, b) => b.similarity - a.similarity));
+      const similarities = await calculateSemanticSimilarity(input, allTargets);
+      const searchResults = allTargets.map((target, index) => ({
+        name: target,
+        similarity: similarities[index]
+      }));
+      setResults(searchResults.sort((a, b) => b.similarity - a.similarity));
+    } catch (error) {
+      console.error("Search error:", error);
+      alert("An error occurred during the search. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
   }
 
   return (
@@ -66,7 +75,9 @@ function SearchComponent({ model }) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter search term"
       />
-      <button onClick={handleSearch} disabled={!model}>Search</button>
+      <button onClick={handleSearch} disabled={isSearching}>
+        {isSearching ? 'Searching...' : 'Search'}
+      </button>
       <div>
         <h3>Custom Names (one per line):</h3>
         <textarea
