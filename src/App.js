@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UniversalSentenceEncoder } from 'use-transformer-js';
+import * as use from '@tensorflow-models/universal-sentence-encoder';
 import SearchComponent from './SearchComponent';
 
 function App() {
@@ -8,9 +8,8 @@ function App() {
 
   useEffect(() => {
     async function loadModel() {
-      const useModel = new UniversalSentenceEncoder();
-      await useModel.load();
-      setModel(useModel);
+      const loadedModel = await use.load();
+      setModel(loadedModel);
       setIsLoading(false);
     }
     loadModel();
