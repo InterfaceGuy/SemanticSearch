@@ -2,12 +2,27 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import time
+import sys
+
+def progress_bar(current, total, width=50):
+    percent = float(current) / total
+    arrow = '-' * int(percent * width)
+    spaces = ' ' * (width - len(arrow))
+    sys.stdout.write(f"\rProgress: [{arrow + spaces}] {int(percent * 100)}%")
+    sys.stdout.flush()
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
 
-# Load the Universal Sentence Encoder model
-model = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
+# Custom progress function
+def progress(value):
+    if value.numpy() == 1.0:
+        print("\nModel download complete. Loading model...")
+    else:
+        progress_bar(value.numpy(), 1.0)
+
+# Load the Universal Sentence Encoder model with progress tracking
+model = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4", progress=progress)
 
 end_time = time.time()
 print(f"Model loaded successfully in {end_time - start_time:.2f} seconds.")
