@@ -21,3 +21,7 @@
   background-color: #4caf50;
   transition: width 0.5s ease-in-out;
 }
+
+.download-bar .progress {
+  background-color: #2196F3;
+}

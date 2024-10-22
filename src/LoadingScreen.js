@@ -2,7 +2,7 @@ import React from 'react';
 import './LoadingScreen.css';
 
 function LoadingScreen({ status }) {
-  const { progress, message } = status;
+  const { progress, message, downloadProgress } = status;
 
   return (
     <div className="loading-screen">
@@ -12,6 +12,11 @@ function LoadingScreen({ status }) {
       </div>
       <p>{progress}% Complete</p>
       <p>{message}</p>
+      <h3>Downloading Model</h3>
+      <div className="progress-bar download-bar">
+        <div className="progress" style={{ width: `${downloadProgress}%` }}></div>
+      </div>
+      <p>{downloadProgress}% Downloaded</p>
     </div>
   );
 }
