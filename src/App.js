@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SearchComponent from './SearchComponent';
 import LoadingScreen from './LoadingScreen';
-const { ipcRenderer } = window.require('electron');
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
