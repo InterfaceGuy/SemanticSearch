@@ -23,7 +23,7 @@ def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def camel_case_to_sentence(text):
-    return re.sub(r'(?<!^)(?=[A-Z])', ' ', text).strip()
+    return ' '.join(re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|\W|$)|\d+', text)).strip()
 
 def semantic_search(query, targets, name_mapping):
     # Encode the query and targets
