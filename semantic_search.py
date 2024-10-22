@@ -6,14 +6,13 @@ import time
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
 
-# Load the Universal Sentence Encoder Lite model
-model_url = "https://tfhub.dev/google/universal-sentence-encoder-multilingual/3"
+# Load the Universal Sentence Encoder model
+model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
 model = hub.load(model_url)
 
 # Define the encoding function
-@tf.function
 def encode(texts):
-    return model(texts)
+    return model(texts).numpy()
 
 end_time = time.time()
 print(f"\nModel loaded successfully in {end_time - start_time:.2f} seconds.")
