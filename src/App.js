@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as use from '@tensorflow-models/universal-sentence-encoder/dist/lite';
+import * as use from '@tensorflow-models/universal-sentence-encoder';
 import SearchComponent from './SearchComponent';
 import LoadingScreen from './LoadingScreen';
 
