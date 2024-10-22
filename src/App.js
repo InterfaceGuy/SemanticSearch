@@ -38,14 +38,16 @@ function App() {
     loadModel();
   }, []);
 
-  if (loadingStatus.isLoading) {
-    return <LoadingScreen status={loadingStatus} />;
-  }
-
   return (
     <div className="App">
-      <h1>Semantic Search</h1>
-      <SearchComponent model={model} />
+      {loadingStatus.isLoading ? (
+        <LoadingScreen status={loadingStatus} />
+      ) : (
+        <>
+          <h1>Semantic Search</h1>
+          <SearchComponent model={model} />
+        </>
+      )}
     </div>
   );
 }

@@ -43,11 +43,6 @@ function SearchComponent({ model }) {
   }
 
   async function handleSearch() {
-    if (!model) {
-      alert("Model is not ready yet. Please wait a moment and try again.");
-      return;
-    }
-
     setIsSearching(true);
     try {
       const customNameList = customNames.split('\n').filter(name => name.trim() !== '');
