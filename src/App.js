@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as use from '@tensorflow-models/universal-sentence-encoder';
+import * as use from '@tensorflow-models/universal-sentence-encoder/dist/lite';
 import SearchComponent from './SearchComponent';
 import LoadingScreen from './LoadingScreen';
 
@@ -10,27 +10,19 @@ function App() {
   useEffect(() => {
     async function loadModel() {
       try {
-        setLoadingStatus({ isLoading: true, progress: 5, message: 'Preparing to load model...' });
+        setLoadingStatus({ isLoading: true, progress: 0, message: 'Preparing to load lite model...' });
         
-        // Simulate initial loading steps
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setLoadingStatus({ isLoading: true, progress: 10, message: 'Starting model download...' });
-        
-        const loadedModel = await use.load((progress) => {
-          const adjustedProgress = Math.round(progress * 80) + 10;
+        const loadedModel = await use.loadQnA((progress) => {
+          const adjustedProgress = Math.round(progress * 100);
           setLoadingStatus({ 
             isLoading: true, 
             progress: adjustedProgress, 
-            message: `Downloading model: ${adjustedProgress}%`
+            message: `Loading lite model: ${adjustedProgress}%`
           });
         });
 
-        setLoadingStatus({ isLoading: true, progress: 95, message: 'Finalizing...' });
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate finalization
         setModel(loadedModel);
-        setLoadingStatus({ isLoading: true, progress: 100, message: 'Model loaded successfully!' });
-        await new Promise(resolve => setTimeout(resolve, 500)); // Show 100% briefly
-        setLoadingStatus({ isLoading: false, progress: 100, message: 'Ready!' });
+        setLoadingStatus({ isLoading: false, progress: 100, message: 'Lite model loaded successfully!' });
       } catch (error) {
         setLoadingStatus({ isLoading: false, progress: 0, message: `Error loading model: ${error.message}` });
       }
