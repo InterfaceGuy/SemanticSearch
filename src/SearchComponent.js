@@ -71,7 +71,7 @@ export default SearchComponent;
     "Cultural perspectives on dreams", "Dreams and memory consolidation",
     "Prophetic dreams", "Daydreaming and creativity", "Dream-inspired art",
     "Sleep disorders and dreaming", "Meditation and dream quality"
-  ], []);
+  ]);
 
   useEffect(() => {
     async function embedTargets() {

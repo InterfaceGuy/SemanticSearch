@@ -59,43 +59,26 @@ export default App;
             downloadProgress: adjustedProgress, 
             message: `Downloading model: ${adjustedProgress}%`
           }));
-        });
-
-        setLoadingStatus(prevStatus => ({ 
-          ...prevStatus,
-          progress: 50, 
-          downloadProgress: 100, 
-          message: 'Model downloaded, now loading...' 
-        }));
-
-        await loadedModel.embed(['Test sentence to initialize the model']);
-
-        setModel(loadedModel);
-        setLoadingStatus({ 
-          isLoading: false, 
-          progress: 100, 
-          downloadProgress: 100, 
-          message: 'Model loaded successfully!' 
-        });
+        setIsLoading(false);
       } catch (error) {
-        setLoadingStatus({ 
-          isLoading: false, 
-          progress: 0, 
-          downloadProgress: 0, 
-          message: `Error loading model: ${error.message}` 
+        console.error('Error initializing app:', error);
+        setLoadingStatus({
+          progress: 100,
+          message: 'Error: ' + error.message
         });
       }
     }
-    loadModel();
+
+    initializeApp();
   }, []);
 
   return (
     <div className="App">
       <h1>Semantic Search</h1>
-      {loadingStatus.isLoading ? (
+      {isLoading ? (
         <LoadingScreen status={loadingStatus} />
       ) : (
-        <SearchComponent model={model} loadingStatus={loadingStatus} />
+        <SearchComponent />
       )}
     </div>
   );
