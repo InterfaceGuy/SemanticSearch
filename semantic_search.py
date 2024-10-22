@@ -4,6 +4,7 @@ import numpy as np
 import time
 import json
 import re
+import sys
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
@@ -44,24 +45,18 @@ def load_targets():
         names = json.load(f)
         return {camel_case_to_sentence(name).lower(): name for name in names}
 
-# Example usage
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python semantic_search.py <search_query>")
+        sys.exit(1)
+
+    query = sys.argv[1]
     targets = load_targets()
     
-    while True:
-        query = input("Enter your search query (or 'quit' to exit): ")
-        if query.lower() == 'quit':
-            break
-        
-        results = semantic_search(query, list(targets.keys()), targets)
-        
-        print("\nSearch results:")
-        for original_name, similarity in results:
-            print(f"{original_name}: {similarity:.4f}")
-        print()
-        
-        # Save semantic distances to JSON file
-        semantic_distances = {name: float(similarity) for name, similarity in results}
-        with open('semantic_distances.json', 'w') as f:
-            json.dump(semantic_distances, f, indent=2)
-        print("Semantic distances saved to semantic_distances.json")
+    results = semantic_search(query, list(targets.keys()), targets)
+    
+    # Save semantic distances to JSON file
+    semantic_distances = {name: float(similarity) for name, similarity in results}
+    with open('semantic_distances.json', 'w') as f:
+        json.dump(semantic_distances, f, indent=2)
+    print("Semantic distances saved to semantic_distances.json")

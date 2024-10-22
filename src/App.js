@@ -3,26 +3,56 @@ import * as use from '@tensorflow-models/universal-sentence-encoder';
 import SearchComponent from './SearchComponent';
 import LoadingScreen from './LoadingScreen';
 
+import React, { useState, useEffect } from 'react';
+import LoadingScreen from './LoadingScreen';
+import SearchComponent from './SearchComponent';
+
+const { ipcRenderer } = window.require('electron');
+
 function App() {
-  const [model, setModel] = useState(null);
-  const [loadingStatus, setLoadingStatus] = useState({ 
-    isLoading: true, 
-    progress: 0, 
-    downloadProgress: 0, 
-    message: 'Initializing...' 
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState({
+    progress: 0,
+    message: 'Initializing...'
   });
 
   useEffect(() => {
-    async function loadModel() {
+    async function initializeApp() {
       try {
-        setLoadingStatus({ 
-          isLoading: true, 
-          progress: 0, 
-          downloadProgress: 0, 
-          message: 'Preparing to load model...' 
+        setLoadingStatus({
+          progress: 50,
+          message: 'Loading application...'
         });
         
-        const loadedModel = await use.load((progress) => {
+        // Simulate initialization process
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        setLoadingStatus({
+          progress: 100,
+          message: 'Error: ' + error.message
+        });
+      }
+    }
+
+    initializeApp();
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen status={loadingStatus} />;
+  }
+
+  return (
+    <div className="App">
+      <h1>Semantic Search</h1>
+      <SearchComponent />
+    </div>
+  );
+}
+
+export default App;
           const adjustedProgress = Math.round(progress * 100);
           setLoadingStatus(prevStatus => ({ 
             ...prevStatus,
