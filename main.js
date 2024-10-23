@@ -66,7 +66,10 @@ app.on('activate', function () {
 ipcMain.handle('run-command', async (event, command) => {
   return new Promise((resolve, reject) => {
     const fullCommand = command.replace(/^python/, pythonPath);
-    exec(fullCommand, (error, stdout, stderr) => {
+    const options = {
+      env: { ...process.env, PYTHONPATH: path.dirname(pythonPath) }
+    };
+    exec(fullCommand, options, (error, stdout, stderr) => {
       if (error) reject(error);
       else resolve(stdout);
     });
