@@ -1,10 +1,13 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { PythonShell } = require('python-shell');
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
+const Store = require('electron-store');
+
+const store = new Store();
 
 let mainWindow;
 let pythonPath;
@@ -64,16 +67,17 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow();
 });
 
-ipcMain.handle('run-search', async (event, query) => {
+ipcMain.handle('run-search', async (event, query, directoryPath) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, 'python', 'semantic_search.py');
     console.log('Running Python script:', scriptPath);
     console.log('Search query:', query);
+    console.log('Directory path:', directoryPath);
 
     PythonShell.run(
       scriptPath,
       { 
-        args: [query],
+        args: [query, directoryPath],
         pythonPath: pythonPath
       },
       function (err, results) {
@@ -102,4 +106,24 @@ ipcMain.handle('get-results', async (event, maxResults) => {
     console.error('Error reading results:', error);
     return { error: error.message };
   }
+});
+
+ipcMain.handle('select-directory', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  });
+  
+  if (result.canceled) {
+    return null;
+  } else {
+    return result.filePaths[0];
+  }
+});
+
+ipcMain.handle('save-directory-path', async (event, directoryPath) => {
+  store.set('directoryPath', directoryPath);
+});
+
+ipcMain.handle('get-directory-path', async () => {
+  return store.get('directoryPath', '');
 });

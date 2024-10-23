@@ -5,6 +5,7 @@ import time
 import json
 import re
 import sys
+import os
 
 print("Downloading and loading the Universal Sentence Encoder model...")
 start_time = time.time()
@@ -39,21 +40,22 @@ def semantic_search(query, targets, name_mapping):
     
     return results
 
-# Load targets from JSON file
-def load_targets():
-    with open('names.json', 'r') as f:
-        names = json.load(f)
-        return {camel_case_to_sentence(name).lower(): name for name in names}
+# Load targets from directory
+def load_targets(directory_path):
+    names = [name for name in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, name))]
+    return {camel_case_to_sentence(name).lower(): name for name in names}
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python semantic_search.py <search_query>")
+    if len(sys.argv) < 3:
+        print("Usage: python semantic_search.py <search_query> <directory_path>")
         sys.exit(1)
 
     query = sys.argv[1]
+    directory_path = sys.argv[2]
     print(f"Received query: {query}")
+    print(f"Directory path: {directory_path}")
     
-    targets = load_targets()
+    targets = load_targets(directory_path)
     print(f"Loaded {len(targets)} targets")
     
     results = semantic_search(query, list(targets.keys()), targets)
