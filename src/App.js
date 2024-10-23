@@ -6,6 +6,8 @@ const { ipcRenderer } = window.require('electron');
 function App() {
   const [directoryPath, setDirectoryPath] = useState('');
   const [maxResults, setMaxResults] = useState(5);
+  const [results, setResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     ipcRenderer.invoke('read-file', 'config.json')
@@ -20,6 +22,11 @@ function App() {
       setDirectoryPath(result);
       await ipcRenderer.invoke('write-file', 'config.json', JSON.stringify({ directoryPath: result }));
     }
+  };
+
+  const handleSearchComplete = (searchResults) => {
+    setResults(searchResults);
+    setIsSearching(false);
   };
 
   return (
@@ -41,7 +48,24 @@ function App() {
           placeholder="Max results"
         />
       </div>
-      <SearchComponent maxResults={maxResults} directoryPath={directoryPath} />
+      <SearchComponent 
+        maxResults={maxResults} 
+        directoryPath={directoryPath} 
+        onSearchStart={() => setIsSearching(true)}
+        onSearchComplete={handleSearchComplete}
+      />
+      {isSearching ? (
+        <p>Searching...</p>
+      ) : (
+        <div className="results">
+          <h2>Results:</h2>
+          {results.map(([name, similarity]) => (
+            <div key={name} className="result-item">
+              {name}: {similarity.toFixed(4)}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
