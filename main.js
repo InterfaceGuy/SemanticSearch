@@ -34,14 +34,20 @@ app.on('activate', function () {
 
 ipcMain.handle('run-search', async (event, query) => {
   return new Promise((resolve, reject) => {
+    const scriptPath = path.join(__dirname, 'python', 'semantic_search.py');
+    console.log('Running Python script:', scriptPath);
+    console.log('Search query:', query);
+
     PythonShell.run(
-      path.join(__dirname, 'python', 'semantic_search.py'),
+      scriptPath,
       { args: [query] },
       function (err, results) {
         if (err) {
           console.error('Error running Python script:', err);
+          console.error('Error details:', JSON.stringify(err, null, 2));
           reject(err);
         } else {
+          console.log('Python script results:', results);
           resolve({ success: true });
         }
       }

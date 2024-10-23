@@ -51,12 +51,17 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
+    print(f"Received query: {query}")
+    
     targets = load_targets()
+    print(f"Loaded {len(targets)} targets")
     
     results = semantic_search(query, list(targets.keys()), targets)
     
     # Save semantic distances to JSON file
     semantic_distances = {name: float(similarity) for name, similarity in results}
-    with open('semantic_distances.json', 'w') as f:
+    output_file = 'semantic_distances.json'
+    with open(output_file, 'w') as f:
         json.dump(semantic_distances, f, indent=2)
-    print("Semantic distances saved to semantic_distances.json")
+    print(f"Semantic distances saved to {output_file}")
+    print(f"Top 5 results: {results[:5]}")

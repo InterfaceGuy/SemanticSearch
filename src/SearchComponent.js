@@ -10,11 +10,17 @@ function SearchComponent() {
   const handleSearch = async () => {
     setIsSearching(true);
     try {
-      await ipcRenderer.invoke('run-search', input);
+      console.log('Sending search request:', input);
+      const runResult = await ipcRenderer.invoke('run-search', input);
+      console.log('Run search result:', runResult);
+      
       const searchResults = await ipcRenderer.invoke('get-results', maxResults);
+      console.log('Search results:', searchResults);
+      
       setResults(Object.entries(searchResults).sort((a, b) => b[1] - a[1]).slice(0, maxResults));
     } catch (error) {
       console.error('Error during search:', error);
+      setResults([['Error', error.message]]);
     }
     setIsSearching(false);
   };
