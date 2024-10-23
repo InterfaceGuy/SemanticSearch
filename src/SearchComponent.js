@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import path from 'path';
 import './SearchComponent.css';
-const { ipcRenderer } = window.require('electron');
+const { ipcRenderer, remote } = window.require('electron');
+const path = remote.require('path');
 
 function SearchComponent({ maxResults, directoryPath, onSearchStart, onSearchComplete }) {
   const [input, setInput] = useState('');
