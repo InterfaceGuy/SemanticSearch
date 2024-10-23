@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SearchComponent from './SearchComponent';
+import './App.css';  // You'll need to create this file
 const { ipcRenderer } = window.require('electron');
 
 function App() {
