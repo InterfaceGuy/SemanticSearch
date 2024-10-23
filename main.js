@@ -5,9 +5,11 @@ const { PythonShell } = require('python-shell');
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
-const Store = require('electron-store');
-
-const store = new Store();
+let store;
+(async () => {
+  const { default: Store } = await import('electron-store');
+  store = new Store();
+})();
 
 let mainWindow;
 let pythonPath;
@@ -121,9 +123,18 @@ ipcMain.handle('select-directory', async () => {
 });
 
 ipcMain.handle('save-directory-path', async (event, directoryPath) => {
-  store.set('directoryPath', directoryPath);
+  if (store) {
+    store.set('directoryPath', directoryPath);
+  } else {
+    console.error('Store not initialized yet');
+  }
 });
 
 ipcMain.handle('get-directory-path', async () => {
-  return store.get('directoryPath', '');
+  if (store) {
+    return store.get('directoryPath', '');
+  } else {
+    console.error('Store not initialized yet');
+    return '';
+  }
 });
