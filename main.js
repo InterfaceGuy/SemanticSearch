@@ -1,15 +1,9 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs');
-const { PythonShell } = require('python-shell');
+const fs = require('fs').promises;
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
-let store;
-(async () => {
-  const { default: Store } = await import('electron-store');
-  store = new Store();
-})();
 
 let mainWindow;
 let pythonPath;
@@ -69,45 +63,22 @@ app.on('activate', function () {
   if (mainWindow === null) createWindow();
 });
 
-ipcMain.handle('run-search', async (event, query, directoryPath) => {
+ipcMain.handle('run-command', async (event, command) => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, 'python', 'semantic_search.py');
-    console.log('Running Python script:', scriptPath);
-    console.log('Search query:', query);
-    console.log('Directory path:', directoryPath);
-
-    PythonShell.run(
-      scriptPath,
-      { 
-        args: [query, directoryPath],
-        pythonPath: pythonPath
-      },
-      function (err, results) {
-        if (err) {
-          console.error('Error running Python script:', err);
-          console.error('Error details:', JSON.stringify(err, null, 2));
-          reject(err);
-        } else {
-          console.log('Python script results:', results);
-          resolve({ success: true });
-        }
-      }
-    );
+    exec(command, (error, stdout, stderr) => {
+      if (error) reject(error);
+      else resolve(stdout);
+    });
   });
 });
 
-ipcMain.handle('get-results', async (event, maxResults) => {
-  try {
-    const data = await fs.promises.readFile(path.join(__dirname, 'semantic_distances.json'), 'utf8');
-    const results = JSON.parse(data);
-    const sortedResults = Object.entries(results)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, maxResults);
-    return Object.fromEntries(sortedResults);
-  } catch (error) {
-    console.error('Error reading results:', error);
-    return { error: error.message };
-  }
+ipcMain.handle('read-file', async (event, filePath) => {
+  return await fs.readFile(filePath, 'utf8');
+});
+
+ipcMain.handle('write-file', async (event, filePath, content) => {
+  await fs.writeFile(filePath, content, 'utf8');
+  return true;
 });
 
 ipcMain.handle('select-directory', async () => {
@@ -119,22 +90,5 @@ ipcMain.handle('select-directory', async () => {
     return null;
   } else {
     return result.filePaths[0];
-  }
-});
-
-ipcMain.handle('save-directory-path', async (event, directoryPath) => {
-  if (store) {
-    store.set('directoryPath', directoryPath);
-  } else {
-    console.error('Store not initialized yet');
-  }
-});
-
-ipcMain.handle('get-directory-path', async () => {
-  if (store) {
-    return store.get('directoryPath', '');
-  } else {
-    console.error('Store not initialized yet');
-    return '';
   }
 });
