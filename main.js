@@ -2,8 +2,12 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { PythonShell } = require('python-shell');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 
 let mainWindow;
+let pythonPath;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -22,7 +26,35 @@ function createWindow() {
   });
 }
 
-app.on('ready', createWindow);
+app.on('ready', async () => {
+  await setupVirtualEnv();
+  createWindow();
+});
+
+async function setupVirtualEnv() {
+  const venvPath = path.join(__dirname, 'venv');
+  const venvPythonPath = path.join(venvPath, 'bin', 'python');
+  const requirementsPath = path.join(__dirname, 'requirements.txt');
+
+  try {
+    // Create virtual environment
+    await execPromise(`python3 -m venv ${venvPath}`);
+    console.log('Virtual environment created successfully');
+
+    // Upgrade pip
+    await execPromise(`${venvPythonPath} -m pip install --upgrade pip`);
+    console.log('Pip upgraded successfully');
+
+    // Install requirements
+    await execPromise(`${venvPythonPath} -m pip install -r ${requirementsPath}`);
+    console.log('Requirements installed successfully');
+
+    pythonPath = venvPythonPath;
+  } catch (error) {
+    console.error('Error setting up virtual environment:', error);
+    app.quit();
+  }
+}
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
@@ -40,7 +72,10 @@ ipcMain.handle('run-search', async (event, query) => {
 
     PythonShell.run(
       scriptPath,
-      { args: [query] },
+      { 
+        args: [query],
+        pythonPath: pythonPath
+      },
       function (err, results) {
         if (err) {
           console.error('Error running Python script:', err);
