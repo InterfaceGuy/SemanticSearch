@@ -18,7 +18,7 @@ function App() {
   const handleSearch = async (input) => {
     setIsSearching(true);
     try {
-      const command = `python /path/to/semantic_search.py "${input}" "${directoryPath}"`;
+      const command = `python python/semantic_search.py "${input}" "${directoryPath}"`;
       await ipcRenderer.invoke('run-command', command);
       
       const searchResults = await ipcRenderer.invoke('read-file', 'semantic_distances.json');

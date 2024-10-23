@@ -65,7 +65,8 @@ app.on('activate', function () {
 
 ipcMain.handle('run-command', async (event, command) => {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    const fullCommand = command.replace(/^python/, pythonPath);
+    exec(fullCommand, (error, stdout, stderr) => {
       if (error) reject(error);
       else resolve(stdout);
     });
