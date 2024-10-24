@@ -3,17 +3,33 @@ import './SearchComponent.css';
 import * as tf from '@tensorflow/tfjs';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
 
+function camelCaseToSentence(text) {
+  return text.split(/(?=[A-Z])/).join(' ').toLowerCase();
+}
+
 function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete }) {
   const [input, setInput] = useState('');
   const [model, setModel] = useState(null);
+  const [processedTargets, setProcessedTargets] = useState([]);
+  const [originalNames, setOriginalNames] = useState({});
 
   useEffect(() => {
     loadModel();
   }, []);
 
+  useEffect(() => {
+    processTargets(targets);
+  }, [targets]);
+
   const loadModel = async () => {
     const loadedModel = await use.load();
     setModel(loadedModel);
+  };
+
+  const processTargets = (rawTargets) => {
+    const processed = rawTargets.map(camelCaseToSentence);
+    setProcessedTargets(processed);
+    setOriginalNames(Object.fromEntries(rawTargets.map(target => [camelCaseToSentence(target), target])));
   };
 
   const cosineSimilarity = (a, b) => {
@@ -25,16 +41,16 @@ function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete 
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (input.trim() && model && targets.length > 0) {
+    if (input.trim() && model && processedTargets.length > 0) {
       onSearchStart();
       try {
         const queryEmbedding = await model.embed(input.trim());
-        const targetEmbeddings = await model.embed(targets);
+        const targetEmbeddings = await model.embed(processedTargets);
 
         const similarities = tf.tidy(() => {
-          const results = targets.map((target, i) => {
+          const results = processedTargets.map((target, i) => {
             const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
-            return [target, similarity.dataSync()[0]];
+            return [originalNames[target], similarity.dataSync()[0]];
           });
           return results.sort((a, b) => b[1] - a[1]).slice(0, maxResults);
         });
