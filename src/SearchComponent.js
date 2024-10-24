@@ -1,54 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import './SearchComponent.css';
-const { ipcRenderer } = window.require('electron');
+import * as tf from '@tensorflow/tfjs';
+import * as use from '@tensorflow-models/universal-sentence-encoder';
 
-function SearchComponent({ maxResults, directoryPath, onSearchStart, onSearchComplete }) {
+function camelCaseToSentence(text) {
+  return text.split(/(?=[A-Z])/).join(' ').toLowerCase();
+}
+
+function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete }) {
   const [input, setInput] = useState('');
-  const [pythonPath, setPythonPath] = useState('');
+  const [model, setModel] = useState(null);
+  const [processedTargets, setProcessedTargets] = useState([]);
+  const [originalNames, setOriginalNames] = useState({});
 
   useEffect(() => {
-    setupPythonEnvironment();
+    loadModel();
   }, []);
 
-  const setupPythonEnvironment = async () => {
-    const venvPath = 'venv';
-    const venvPythonPath = process.platform === 'win32' ? `${venvPath}\\Scripts\\python.exe` : `${venvPath}/bin/python`;
-    const requirementsPath = 'requirements.txt';
+  useEffect(() => {
+    processTargets(targets);
+  }, [targets]);
 
-    try {
-      // Create virtual environment
-      await ipcRenderer.invoke('run-command', `python3 -m venv ${venvPath}`);
-      console.log('Virtual environment created successfully');
+  const loadModel = async () => {
+    const loadedModel = await use.load();
+    setModel(loadedModel);
+  };
 
-      // Upgrade pip
-      await ipcRenderer.invoke('run-command', `"${venvPythonPath}" -m pip install --upgrade pip`);
-      console.log('Pip upgraded successfully');
+  const processTargets = (rawTargets) => {
+    const processed = rawTargets.map(camelCaseToSentence);
+    setProcessedTargets(processed);
+    setOriginalNames(Object.fromEntries(rawTargets.map(target => [camelCaseToSentence(target), target])));
+  };
 
-      // Install requirements
-      await ipcRenderer.invoke('run-command', `"${venvPythonPath}" -m pip install -r ${requirementsPath}`);
-      console.log('Requirements installed successfully');
-
-      setPythonPath(venvPythonPath);
-    } catch (error) {
-      console.error('Error setting up virtual environment:', error);
-    }
+  const cosineSimilarity = (a, b) => {
+    const dotProduct = tf.sum(tf.mul(a, b));
+    const normA = tf.norm(a);
+    const normB = tf.norm(b);
+    return dotProduct.div(tf.mul(normA, normB));
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (input.trim() && pythonPath) {
+    if (input.trim() && model && processedTargets.length > 0) {
       onSearchStart();
       try {
-        const pythonScriptPath = 'python/semantic_search.py';
-        const command = `"${pythonPath}" "${pythonScriptPath}" "${input}" "${directoryPath}"`;
-        await ipcRenderer.invoke('run-command', command);
-        
-        const resultsPath = 'semantic_distances.json';
-        const searchResults = await ipcRenderer.invoke('read-file', resultsPath);
-        const parsedResults = JSON.parse(searchResults);
-        
-        const results = Object.entries(parsedResults).sort((a, b) => b[1] - a[1]).slice(0, maxResults);
-        onSearchComplete(results);
+        const queryEmbedding = await model.embed(input.trim());
+        const targetEmbeddings = await model.embed(processedTargets);
+
+        const similarities = tf.tidy(() => {
+          const results = processedTargets.map((target, i) => {
+            const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
+            return [originalNames[target], similarity.dataSync()[0]];
+          });
+          return results.sort((a, b) => b[1] - a[1]).slice(0, maxResults);
+        });
+
+        onSearchComplete(similarities);
       } catch (error) {
         console.error('Error during search:', error);
         onSearchComplete([['Error', error.message]]);

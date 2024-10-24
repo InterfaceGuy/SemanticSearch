@@ -8,19 +8,35 @@ function App() {
   const [maxResults, setMaxResults] = useState(5);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [targets, setTargets] = useState([]);
 
   useEffect(() => {
     ipcRenderer.invoke('read-file', 'config.json')
       .then(JSON.parse)
-      .then(config => setDirectoryPath(config.directoryPath))
+      .then(config => {
+        setDirectoryPath(config.directoryPath);
+        loadTargets(config.directoryPath);
+      })
       .catch(console.error);
   }, []);
+
+  const loadTargets = async (path) => {
+    if (path) {
+      try {
+        const folders = await ipcRenderer.invoke('get-directory-folders', path);
+        setTargets(folders);
+      } catch (error) {
+        console.error('Error loading targets:', error);
+      }
+    }
+  };
 
   const handleDirectorySelect = async () => {
     const result = await ipcRenderer.invoke('select-directory');
     if (result) {
       setDirectoryPath(result);
       await ipcRenderer.invoke('write-file', 'config.json', JSON.stringify({ directoryPath: result }));
+      loadTargets(result);
     }
   };
 
@@ -50,7 +66,7 @@ function App() {
       </div>
       <SearchComponent 
         maxResults={maxResults} 
-        directoryPath={directoryPath} 
+        targets={targets}
         onSearchStart={() => setIsSearching(true)}
         onSearchComplete={handleSearchComplete}
       />
