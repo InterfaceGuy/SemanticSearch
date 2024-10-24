@@ -62,3 +62,16 @@ ipcMain.handle('select-directory', async () => {
     return result.filePaths[0];
   }
 });
+
+ipcMain.handle('get-directory-folders', async (event, directoryPath) => {
+  try {
+    const entries = await fs.readdir(directoryPath, { withFileTypes: true });
+    const folders = entries
+      .filter(entry => entry.isDirectory())
+      .map(entry => entry.name);
+    return folders;
+  } catch (error) {
+    console.error('Error reading directory:', error);
+    throw error;
+  }
+});
