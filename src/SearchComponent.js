@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './SearchComponent.css';
 import * as tf from '@tensorflow/tfjs';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
@@ -13,6 +13,7 @@ function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete 
   const [model, setModel] = useState(null);
   const [processedTargets, setProcessedTargets] = useState([]);
   const [originalNames, setOriginalNames] = useState({});
+  const prevInputRef = useRef('');
 
   useEffect(() => {
     loadModel();
@@ -67,8 +68,9 @@ function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete 
   );
 
   useEffect(() => {
-    if (input.trim()) {
+    if (input.trim() && input !== prevInputRef.current) {
       handleSearch(input);
+      prevInputRef.current = input;
     }
   }, [input, handleSearch]);
 
