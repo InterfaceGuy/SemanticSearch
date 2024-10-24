@@ -24,10 +24,7 @@ function App() {
     if (path) {
       try {
         const folders = await ipcRenderer.invoke('get-directory-folders', path);
-        const processedTargets = folders.map(folder => {
-          return folder.split(/(?=[A-Z])/).join(' ').toLowerCase();
-        });
-        setTargets(processedTargets);
+        setTargets(folders);
       } catch (error) {
         console.error('Error loading targets:', error);
       }
