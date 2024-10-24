@@ -3,37 +3,17 @@ import './SearchComponent.css';
 import * as tf from '@tensorflow/tfjs';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
 
-function SearchComponent({ maxResults, directoryPath, onSearchStart, onSearchComplete }) {
+function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete }) {
   const [input, setInput] = useState('');
   const [model, setModel] = useState(null);
-  const [targets, setTargets] = useState([]);
 
   useEffect(() => {
     loadModel();
-    loadTargets();
-  }, [directoryPath]);
+  }, []);
 
   const loadModel = async () => {
     const loadedModel = await use.load();
     setModel(loadedModel);
-  };
-
-  const loadTargets = async () => {
-    // In a real-world scenario, you'd load this from the file system
-    // For this example, we'll use a mock list of targets
-    const mockTargets = [
-      'ProjectManagement',
-      'WebDevelopment',
-      'DataAnalysis',
-      'MachineLearning',
-      'MobileAppDevelopment',
-      'CloudComputing',
-      'Cybersecurity',
-      'UserInterfaceDesign',
-      'DatabaseAdministration',
-      'NetworkEngineering'
-    ];
-    setTargets(mockTargets);
   };
 
   const cosineSimilarity = (a, b) => {
@@ -45,7 +25,7 @@ function SearchComponent({ maxResults, directoryPath, onSearchStart, onSearchCom
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (input.trim() && model) {
+    if (input.trim() && model && targets.length > 0) {
       onSearchStart();
       try {
         const queryEmbedding = await model.embed(input.trim());
