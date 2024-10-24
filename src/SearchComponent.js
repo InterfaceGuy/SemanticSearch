@@ -22,16 +22,16 @@ function SearchComponent({ maxResults, directoryPath, onSearchStart, onSearchCom
     // In a real-world scenario, you'd load this from the file system
     // For this example, we'll use a mock list of targets
     const mockTargets = [
-      'Project Management',
-      'Web Development',
-      'Data Analysis',
-      'Machine Learning',
-      'Mobile App Development',
-      'Cloud Computing',
+      'ProjectManagement',
+      'WebDevelopment',
+      'DataAnalysis',
+      'MachineLearning',
+      'MobileAppDevelopment',
+      'CloudComputing',
       'Cybersecurity',
-      'User Interface Design',
-      'Database Administration',
-      'Network Engineering'
+      'UserInterfaceDesign',
+      'DatabaseAdministration',
+      'NetworkEngineering'
     ];
     setTargets(mockTargets);
   };
