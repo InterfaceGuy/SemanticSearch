@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './SearchComponent.css';
 import * as tf from '@tensorflow/tfjs';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
+import debounce from 'lodash/debounce';
 
 function camelCaseToSentence(text) {
   return text.split(/(?=[A-Z])/).join(' ').toLowerCase();
@@ -39,41 +40,47 @@ function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete 
     return dotProduct.div(tf.mul(normA, normB));
   };
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (input.trim() && model && processedTargets.length > 0) {
-      onSearchStart();
-      try {
-        const queryEmbedding = await model.embed(input.trim());
-        const targetEmbeddings = await model.embed(processedTargets);
+  const handleSearch = useCallback(
+    debounce(async (searchInput) => {
+      if (searchInput.trim() && model && processedTargets.length > 0) {
+        onSearchStart();
+        try {
+          const queryEmbedding = await model.embed(searchInput.trim());
+          const targetEmbeddings = await model.embed(processedTargets);
 
-        const similarities = tf.tidy(() => {
-          const results = processedTargets.map((target, i) => {
-            const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
-            return [originalNames[target], similarity.dataSync()[0]];
+          const similarities = tf.tidy(() => {
+            const results = processedTargets.map((target, i) => {
+              const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
+              return [originalNames[target], similarity.dataSync()[0]];
+            });
+            return results.sort((a, b) => b[1] - a[1]).slice(0, maxResults);
           });
-          return results.sort((a, b) => b[1] - a[1]).slice(0, maxResults);
-        });
 
-        onSearchComplete(similarities);
-      } catch (error) {
-        console.error('Error during search:', error);
-        onSearchComplete([['Error', error.message]]);
+          onSearchComplete(similarities);
+        } catch (error) {
+          console.error('Error during search:', error);
+          onSearchComplete([['Error', error.message]]);
+        }
       }
+    }, 300),
+    [model, processedTargets, originalNames, maxResults, onSearchStart, onSearchComplete]
+  );
+
+  useEffect(() => {
+    if (input.trim()) {
+      handleSearch(input);
     }
-  };
+  }, [input, handleSearch]);
 
   return (
     <div className="search-component">
-      <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Search..."
-          className="search-input"
-        />
-      </form>
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Search..."
+        className="search-input"
+      />
     </div>
   );
 }
