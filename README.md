@@ -1,18 +1,19 @@
-# Semantic Search Script
+# Semantic Search Application
 
-This is a Python script that performs semantic search using TensorFlow Hub and the Universal Sentence Encoder model.
+This is an Electron-based desktop application with a React frontend that performs semantic search using TensorFlow.js and the Universal Sentence Encoder model.
 
 ## Features
 
 - Semantic search functionality
 - Cosine similarity calculation
-- Command-line interface
+- User-friendly graphical interface
+- Directory selection for search targets
+- Configurable number of search results
 
 ## Prerequisites
 
-- Python 3.7+
-- TensorFlow 2.x
-- TensorFlow Hub
+- Node.js (latest LTS version recommended)
+- npm (comes with Node.js)
 
 ## Installation
 
@@ -21,25 +22,42 @@ This is a Python script that performs semantic search using TensorFlow Hub and t
 3. Install the required packages:
 
 ```
-pip install tensorflow tensorflow_hub numpy
+npm install
 ```
 
 ## Usage
 
-To run the script, use:
+To run the application in development mode:
 
 ```
-python semantic_search.py
+npm start
 ```
 
-Follow the prompts to enter search queries. Type 'quit' to exit the program.
+To build the application for production:
+
+```
+npm run build
+```
 
 ## Technologies Used
 
-- Python
-- TensorFlow
-- TensorFlow Hub
+- Electron
+- React
+- TensorFlow.js
 - Universal Sentence Encoder
+- HTML/CSS
+- JavaScript
+
+## Project Structure
+
+- `main.js`: Electron main process file
+- `src/App.js`: Main React component
+- `src/SearchComponent.js`: React component for search functionality
+- `public/index.html`: HTML template
+
+## Configuration
+
+The application uses a `config.json` file for storing settings. You can modify this file to change default behaviors.
 
 ## License
 
