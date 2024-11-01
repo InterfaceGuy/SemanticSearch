@@ -5,7 +5,8 @@ const { ipcRenderer } = window.require('electron');
 
 function App() {
   const [directoryPath, setDirectoryPath] = useState('');
-  const [maxResults, setMaxResults] = useState(5);
+  const [maxResults, setMaxResults] = useState(null);
+  const [threshold, setThreshold] = useState(0.5);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [targets, setTargets] = useState([]);
@@ -58,14 +59,27 @@ function App() {
         <button onClick={handleDirectorySelect}>Select Directory</button>
         <input
           type="number"
-          value={maxResults}
-          onChange={(e) => setMaxResults(Math.max(1, parseInt(e.target.value) || 1))}
+          value={maxResults === null ? '' : maxResults}
+          onChange={(e) => {
+            const value = e.target.value === '' ? null : Math.max(1, parseInt(e.target.value) || 1);
+            setMaxResults(value);
+          }}
           min="1"
-          placeholder="Max results"
+          placeholder="Max results (optional)"
+        />
+        <input
+          type="number"
+          value={threshold}
+          onChange={(e) => setThreshold(Math.max(0, Math.min(1, parseFloat(e.target.value) || 0)))}
+          min="0"
+          max="1"
+          step="0.01"
+          placeholder="Threshold (0-1)"
         />
       </div>
       <SearchComponent 
         maxResults={maxResults} 
+        threshold={threshold}
         targets={targets}
         onSearchStart={() => setIsSearching(true)}
         onSearchComplete={handleSearchComplete}

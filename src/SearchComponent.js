@@ -8,7 +8,7 @@ function camelCaseToSentence(text) {
   return text.split(/(?=[A-Z])/).join(' ').toLowerCase();
 }
 
-function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete }) {
+function SearchComponent({ maxResults, threshold, targets, onSearchStart, onSearchComplete }) {
   const [input, setInput] = useState('');
   const [model, setModel] = useState(null);
   const [processedTargets, setProcessedTargets] = useState([]);
@@ -54,7 +54,11 @@ function SearchComponent({ maxResults, targets, onSearchStart, onSearchComplete 
               const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
               return [originalNames[target], similarity.dataSync()[0]];
             });
-            return results.sort((a, b) => b[1] - a[1]).slice(0, maxResults);
+            const sortedResults = results.sort((a, b) => b[1] - a[1]);
+            if (threshold !== null) {
+              return sortedResults.filter(result => result[1] >= threshold);
+            }
+            return maxResults !== null ? sortedResults.slice(0, maxResults) : sortedResults;
           });
 
           onSearchComplete(similarities);
