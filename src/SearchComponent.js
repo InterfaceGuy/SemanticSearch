@@ -54,11 +54,19 @@ function SearchComponent({ maxResults, threshold, targets, onSearchStart, onSear
               const similarity = cosineSimilarity(queryEmbedding, targetEmbeddings.slice([i, 0], [1, -1]));
               return [originalNames[target], similarity.dataSync()[0]];
             });
-            const sortedResults = results.sort((a, b) => b[1] - a[1]);
-            if (threshold !== null) {
-              return sortedResults.filter(result => result[1] >= threshold);
+            let filteredResults = results.sort((a, b) => b[1] - a[1]);
+            
+            // Apply threshold filtering if set
+            if (threshold !== null && threshold > 0) {
+              filteredResults = filteredResults.filter(result => result[1] >= threshold);
             }
-            return maxResults !== null ? sortedResults.slice(0, maxResults) : sortedResults;
+            
+            // Apply max results limit if set
+            if (maxResults !== null && maxResults > 0) {
+              filteredResults = filteredResults.slice(0, maxResults);
+            }
+            
+            return filteredResults;
           });
 
           onSearchComplete(similarities);
